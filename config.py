@@ -1,4 +1,4 @@
-HOME_DIR = '/home/student/multitask_bot'  # путь к папке с проектом
+HOME_DIR = '/home/student/multi_bot'  # путь к папке с проектом
 LOGS = f'{HOME_DIR}/log_file.txt'  # файл для логов
 DB_FILE = f'{HOME_DIR}/db.sqlite'  # файл для базы данных
 
