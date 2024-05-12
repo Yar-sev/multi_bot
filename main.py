@@ -24,19 +24,55 @@ def handler(message):
         update_data(message.chat.id, "DEBUG", 1)
     elif select_data(message.chat.id)[0][5] == 1:
         update_data(message.chat.id, "DEBUG", 0)
-@bot.message_handler(commands=['TEST'])
+@bot.message_handler(commands=['STT'])
 def handler(message):
-    user_id = message.chat.id
-    status, content = text_to_speech("проверка раз два три ")
+    user_id = message.from_user.id
+    bot.send_message(
+        chat_id=user_id,
+        text="Отправь голосовое сообщение для проверки функции бота"
+    )
+    bot.register_next_step_handler(message, stt)
+def stt(message):
+    user_id = message.from_user.id
+    if not message.voice:
+        bot.send_message(
+            chat_id=user_id,
+            text="Пожалуйста, запиши ГС"
+        )
+        bot.register_next_step_handler(message, stt)
+        return
+    stt_blocks, error = is_stt_block_limit(message.chat.id, message.voice.duration)
+    if not stt_blocks:
+        bot.send_message(user_id, 'Слишком длинное аудио')
+        return
+
+    file_id = message.voice.file_id
+    file_info = bot.get_file(file_id)
+    file = bot.download_file(file_info.file_path)
+    status, text = speech_to_text(file)
     if status:
-        bot.send_voice(user_id, content)
+        bot.send_message(
+            chat_id=user_id,
+            text=text,
+            reply_to_message_id=message.id
+        )
     else:
-        bot.send_message(user_id, content)
-    status, text = speech_to_text(content)
-    if status:
         bot.send_message(user_id, text)
+@bot.message_handler(commands=['TTS'])
+def handler(message):
+    bot.send_message(message.chat.id, "напиши сообщение для проверки функии бота")
+def tts(message):
+    count = count_tokens(message.text)
+    id = message.chat.id
+    if count > 30:
+        bot.send_message(id, "Сообшене длинное")
+        bot.register_next_step_handler(message, tts)
     else:
-        bot.send_message(user_id, text)
+        status, content = text_to_speech(message.text)
+        if status:
+            bot.send_voice(id, content)
+        else:
+            bot.send_message(id, content)
 @bot.message_handler(content_types = ['text'])
 def handler(message):
     if len(datafr()) < 2 or user(message.chat.id) == True:
