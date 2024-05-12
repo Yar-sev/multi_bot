@@ -1,5 +1,5 @@
 import telebot
-from config import *
+    from config import *
 import logging
 from func import *
 from database_func import *
@@ -61,6 +61,7 @@ def stt(message):
 @bot.message_handler(commands=['TTS'])
 def handler(message):
     bot.send_message(message.chat.id, "напиши сообщение для проверки функии бота")
+    bot.register_next_step_handler(message, tts)
 def tts(message):
     count = count_tokens(message.text)
     id = message.chat.id
